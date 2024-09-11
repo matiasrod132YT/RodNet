@@ -9,11 +9,12 @@ import {
     uploadBytes,
     getDownloadURL,
     query,
+    getDoc,
     collection,
     where,
     getDocs,
-} from './firebase.js';
-import { displayUserProfile } from './app.js';
+} from '../firebase.js';
+import { displayUserProfile } from '../app.js';
 const storage = getStorage();
 
 const getUserPostCount = async (userId) => {
@@ -154,3 +155,92 @@ uploadButtonHeader.addEventListener('click', () => {
         });
     }
 });
+
+// Función para obtener los tweets del usuario
+const getUserTweets = async (userId) => {
+    try {
+        const q = query(collection(db, 'posts'), where('userId', '==', userId)); // Ajusta 'posts' al nombre de tu colección de tweets
+        const querySnapshot = await getDocs(q);
+        const tweets = querySnapshot.docs.map(doc => doc.data());
+        return tweets;
+    } catch (error) {
+        console.error('Error fetching user tweets:', error.message);
+        return [];
+    }
+};
+
+const perfilTweetsContainer = document.querySelector('.perfil-tweets');
+
+// Función para renderizar los tweets en el HTML
+export const displayUserTweets = async () => {
+    if (auth.currentUser) {
+        const userId = auth.currentUser.uid;
+
+        try {
+            // Obtener el nombre de usuario
+            const userDoc = await getDoc(doc(db, 'users', userId)); // Ajusta 'users' a tu colección de usuarios
+
+            // Obtener los tweets del usuario
+            const q = query(collection(db, 'posts'), where('userId', '==', userId)); // Ajusta 'posts' al nombre de tu colección de tweets
+            const querySnapshot = await getDocs(q);
+            const tweets = querySnapshot.docs.map(doc => doc.data());
+
+            // Limpiar el contenedor de tweets antes de añadir los nuevos
+            perfilTweetsContainer.innerHTML = '';
+
+            if (tweets.length > 0) {
+                // Crear el HTML para cada tweet
+                tweets.forEach(tweet => {
+                    const tweetElement = document.createElement('div');
+                    tweetElement.classList.add('tweet');
+                    const userHasLiked = tweet.likesBy && tweet.likesBy.includes(auth.currentUser.uid);
+                    tweetElement.innerHTML = `
+                        <div class="tweet-post">
+                        <div class="compose-profile-container">
+                            <img class="compose-profile" src="${userDoc.data().avatarUrl || './images/avatar.png'}" alt="Imagen de perfil">
+                            <div class="tweet-profile-content-container">
+                                <div class="tweet-profile-title-container">
+                                    <div class="tweet-profile-info">
+                                        <div class="tweet-profile-title">${userDoc.data().username || 'Anonymous'}</div>
+                                        <div class="tweet-check-mark">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="tweet-handle">@${userDoc.data().userHandle || 'Anonymous'} · ${new Date(tweet.timestamp.seconds * 1000).toLocaleTimeString()}</div>
+                                    </div>
+                                </div>
+                                <div class="tweet-content">${tweet.text}</div>
+                            </div>
+                        </div>
+
+                        ${tweet.postImg ? `<div class="img-placeholder"><img class="tweet-photo" src="${tweet.postImg}" alt="Imagen del post"></div>` : ''}
+
+                        <div class="tweet-buttons">
+                            <div class="buttons-container">
+                                <i class="far fa-comment"></i>
+                                <div class="number-comments">${tweet.commentsBy ? tweet.commentsBy.length : 0}</div>
+                            </div>
+                            <div class="buttons-container">
+                                <i class="fas fa-retweet"></i>
+                                <div class="number-retweets">${tweet.retweets || 0}</div>
+                            </div>
+                            <div class="buttons-container">
+                                <i class="${userHasLiked ? 'fas fa-heart rojo' : 'far fa-heart'}"></i>
+                                <div class="${userHasLiked ? 'number-likes rojo' : 'number-likes'}">${tweet.likes || 0}</div>
+                            </div>
+                        </div>
+                    `;
+                    perfilTweetsContainer.appendChild(tweetElement);
+                });
+            } else {
+                perfilTweetsContainer.innerHTML = '<p>No hay tweets disponibles.</p>';
+            }
+
+        } catch (error) {
+            console.error('Error fetching user data or tweets:', error.message);
+            perfilTweetsContainer.innerHTML = '<p>Error al cargar los tweets.</p>';
+        }
+    } else {
+        console.error('No user is currently authenticated.');
+        perfilTweetsContainer.innerHTML = '<p>No hay usuario autenticado.</p>';
+    }
+};

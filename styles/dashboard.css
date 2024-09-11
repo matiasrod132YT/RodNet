@@ -3,9 +3,9 @@ html,body {
   padding: 0;
   height: 100%;
   width: 100%;
-  overflow-x: hidden;
   background-color: rgb(0, 0, 0);
   color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
 }
 body .container {
   display: flex;
@@ -19,15 +19,22 @@ body .container {
   height: 0;
 }
 #home {
-  width: 100%;
-  margin: 0 auto;
+  display: block;
+}
+
+#home,
+#notificaciones,
+#retweets,
+#liked,
+#admin,
+#perfil {
   max-height: 100vh;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 @media (min-width: 1440px) {
   body .container {
     display: flex;
-    width: 70%;
     justify-content: center;
     margin: auto;
   }
@@ -36,7 +43,6 @@ body .container {
     flex-direction: column;
     flex: 0 1 275px;
     font-family: 'Roboto', sans-serif;
-    padding: 0 20px;
     border-right: 1px solid #2f3336;
   }
   
@@ -89,7 +95,7 @@ body .container {
     justify-content: center;
   }
 
-  .hover-wrapper button.tweet-modal-button {
+  .hover-wrapper .tweet-modal-button {
     width: 49px;
     height: 49px;
     border-radius: 50%;
@@ -103,7 +109,7 @@ body .container {
     display: none;
   }
 
-  button.tweet-modal-button .tweet-model-button-icon {
+  .tweet-modal-button .tweet-model-button-icon {
     display: block;
   }
 }
@@ -192,7 +198,7 @@ body .container {
     justify-content: space-between;
   }
 
-  .hover-wrapper button.tweet-modal-button {
+  .hover-wrapper .tweet-modal-button {
     width: 49px;
     height: 49px;
     border-radius: 50%;
@@ -217,10 +223,7 @@ body .container {
     margin: 12px 0;
   }
 
-  .container .twitter-container {
-    width: 100%;
-    flex: initial;
-  }
+  
 
   span.profile-container {
     display: flex;
@@ -257,10 +260,14 @@ body .container {
 
 .container {
   display: flex;
-  width: 95%;
+  width: 90%;
   margin: auto;
 }
 
+.content-section {
+  width: 598px;
+  display: none;
+}
 
 .left-menu {
   display: flex;
@@ -269,14 +276,6 @@ body .container {
   border-right: 1px solid #2f3336;
   height: 100vh; /* Asegura que el nav ocupa toda la altura de la ventana */
   padding: 0 8px;
-}
-
-.logo-container {
-  margin-top: -1rem;
-}
-
-.logo {
-  font-size: 30px;
 }
 
 ul.menu-icons {
@@ -292,18 +291,27 @@ li {
 }
 
 .hover-wrapper{
+  display: flex;
   padding: 12px;
   border-radius: 50px;
-  width: auto;
+  align-items: center;
+  width: fit-content;
   cursor: pointer;
+  transition: font-weight 0.2s ease; /* Agrega la transición para font-weight */
 }
 
 .hover-wrapper:hover {
   font-weight: 700;
+  background-color: #181818;
 }
 
 .perfil-container {
   margin-bottom: 15px;
+  border-radius: 50px;
+}
+
+.perfil-container:hover {
+  background-color: #181818;
 }
 
 .perfil {
@@ -337,26 +345,44 @@ li {
   color: #71767b;
 }
 
+.user-avatar {
+  user-select: none;
+}
 .config {
   font-size: 15px;
   cursor: pointer;
 }
 
+.logo {
+  display: inline-block;
+  display: flex;
+  padding: 12px;
+  border-radius: 50px;
+  width: fit-content;
+  align-items: center;
+  cursor: pointer;
+}
+.logo:hover {
+  background-color: #181818;
+}
 
-button.tweet-modal-button {
+.tweet-modal-button {
+  display: flex;
   width: 211px;
   height: 49px;
   border-radius: 30px;
   font-size: 18px;
   border-style: none;
+  justify-content: center;
+  align-items: center;
   font-weight: bold;
   margin-left: -15px;
   color: #fff;
   background-color: #39a2f2;
+  cursor: pointer;
 }
 /* Profile Container Styles */
 .perfil-contenedor {
-  width: 800px;
   margin: 0;
   padding: 0px;
   border-radius: 8px;
@@ -365,8 +391,6 @@ button.tweet-modal-button {
 
 /* Profile Header Styles */
 .perfil-header-top {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 15px 100px;
   border-bottom: 1px solid #2f3336;
@@ -500,10 +524,7 @@ button.tweet-modal-button {
   font-size: 19px;
 }
 
-.twitter-container {
-  width: 800px;
-  flex: 2 1 598px;
-}
+
 
 header {
   display: flex;
@@ -606,6 +627,8 @@ textarea {
 }
 
 .tweet-profile-content-container {
+  font-size: 15px;
+  font-family: 'Roboto', sans-serif;
   padding: 8px 0 0 10px;
   width: 90%;
 }
@@ -622,7 +645,6 @@ textarea {
 
 .tweet-profile-title {
   padding-right: 3px;
-  font-family: 'Roboto', sans-serif;
   font-weight: 900;
 }
 
@@ -637,8 +659,6 @@ i.fas.fa-check-circle {
 
 .tweet-handle {
   color: #71767b;
-  font-family: 'Roboto', sans-serif;
-  font-size: 15px;
   font-weight: 500;
 }
 
@@ -659,11 +679,6 @@ i.fas.fa-check-circle {
 }
 .tweet-post:hover {
   background-color: #080808;
-}
-/* Si es necesario, ajusta el tamaño del contenedor para los tweets */
-.twitter-container {
-  width: 800px; /* O el ancho que prefieras */
-  flex: 2 1 598px;
 }
 
 .img-placeholder {
@@ -874,4 +889,7 @@ input.search-bar {
 
 .emoji-item:hover {
   transform: scale(1.2);
+}
+.retweet-style {
+  padding: 12px;
 }

@@ -1,11 +1,11 @@
-import { 
-    auth,
-    db,
-    setDoc,
-    doc,
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-} from './firebase.js';
+import {
+  auth,
+  db, 
+  setDoc, 
+  doc, 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+ } from "./firebase.js"
 
 // Toggle between Login and Register forms
 document.getElementById('show-register')?.addEventListener('click', (e) => {
@@ -30,7 +30,11 @@ document.getElementById('login-button')?.addEventListener('click', async () => {
         window.location.href = 'dashboard.html'; // Redirect to dashboard on successful login
     } catch (error) {
         console.error('Login Error:', error);
-        alert(`Error: ${error.message}`);
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: `${error.message}`
+        });
     }
 });
 
@@ -44,25 +48,16 @@ document.getElementById('register-button')?.addEventListener('click', async () =
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        console.log("Usuario registrado:", user.uid);
-
-        // Guardar información del usuario en Firestore
+        // Save user info to Firestore
         await setDoc(doc(db, 'users', user.uid), {
             username: username,
-            email: email
+            email: email,
+            userHandle: email.split('@')[0],
         });
-        console.log("Documento creado en Firestore para el usuario:", user.uid);
 
-        window.location.href = 'dashboard.html'; // Redirigir al dashboard en caso de éxito
+        window.location.href = 'dashboard.html'; // Redirect to dashboard on successful registration
     } catch (error) {
-        console.error('Error en el registro:', error);
+        console.error('Registration Error:', error);
         alert(`Error: ${error.message}`);
-    }
-});
-
-
-auth.onAuthStateChanged(user => {
-    if (user) {
-        window.location.href = 'dashboard.html';
     }
 });
