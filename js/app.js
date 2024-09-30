@@ -12,16 +12,18 @@ import {
     ref,
     uploadBytes,
     getDownloadURL,
-} from './firebase.js';
+} from './apis/firebase.js';
 import { fetchPosts } from './paginas/text.js';
 import { displayUserTweets, updateCountPosts } from './paginas/perfil.js';
 import { displayLikedTweets } from './paginas/liked.js';
 import { displayReTweets } from './paginas/retweet.js';
 import { displayNotificaciones } from './paginas/notificaciones.js';
-import { updateTrends } from './trends.js';
+import { updateTrends } from './paginas/trends.js';
 
 const imagePreviewContainer = document.getElementById('image-preview-container');
 const imagePreview = document.getElementById('image-preview');
+const avatarPreview = document.getElementById('img-frame');
+const headerPreview = document.getElementById('img-frame-header');
 
 // Manejar clic en el icono de carga de imagen
 document.getElementById('image-upload-icon').addEventListener('click', () => {
@@ -41,9 +43,36 @@ document.getElementById('image-input').addEventListener('change', (event) => {
     }
 });
 
+// Manejar selección de imagen
+document.getElementById('img-file').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            avatarPreview.style.backgroundImage = `url(${e.target.result})`; 
+        };
+        reader.readAsDataURL(file);
+    }
+});
+// Manejar selección de imagen
+document.getElementById('img-file-header').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            headerPreview.style.backgroundImage = `url(${e.target.result})`; 
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
 // Manejar envío del formulario
 document.getElementById('post-form').addEventListener('submit', async (event) => {
     event.preventDefault();
+
+    const postButton = document.getElementById('post-button'); // El botón de envío del post
+    postButton.disabled = true;
+
     const text = document.getElementById('post-text').value.trim();
     const file = document.getElementById('image-input').files[0];
     const userId = auth.currentUser.uid;
@@ -51,8 +80,6 @@ document.getElementById('post-form').addEventListener('submit', async (event) =>
     if (text || file) {
         try {
             let postImgUrl = '';
-            const userDoc = await getDoc(doc(db, 'users', userId));
-            const userData = userDoc.data();
 
             // Subir imagen si hay una
             if (file) {
@@ -80,12 +107,17 @@ document.getElementById('post-form').addEventListener('submit', async (event) =>
             imagePreviewContainer.style.display = 'none';
             
             displayUserTweets();
-
+            updateTrends();
         } catch (error) {
             console.error('Error al publicar:', error);
+        } finally {
+            postButton.disabled = false; // Reactivar el botón después de completar el proceso
         }
+    } else {
+        postButton.disabled = false; // Reactivar el botón si no hay texto o archivo
     }
 });
+
 document.getElementById('logout')?.addEventListener('click', async () => {
     try {
         await signOut(auth);
@@ -94,7 +126,14 @@ document.getElementById('logout')?.addEventListener('click', async () => {
         alert(`Error: ${error.message}`);
     }
 });
-
+document.getElementById('logout2')?.addEventListener('click', async () => {
+    try {
+        await signOut(auth);
+        window.location.href = 'index.html'; // Redirect to index.html on sign out
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    }
+});
 // Set up an authentication state listener
 auth.onAuthStateChanged(user => {
     if (user) {
@@ -149,13 +188,42 @@ export const displayUserProfile = async () => {
             displayLikedTweets();
             displayReTweets();
             displayNotificaciones();
+            
+            
         } else {
             console.log('User document does not exist!');
         }
     } catch (error) {
-        console.error('Error fetching user profile data:', error.message);
+        document.querySelectorAll('.username').forEach(element => {
+            element.textContent = 'Username';
+        });
+
+        document.querySelectorAll('.user-email').forEach(element => {
+            element.textContent = 'Email';
+        })
+
+        document.querySelectorAll('.handle').forEach(element => {
+            element.textContent = 'Handle';
+        });
     }
 };
+
+// Funcion para cambiar de tab admin
+const tabButtons = document.querySelectorAll('.tab-button');
+const tabContents = document.querySelectorAll('.tab-content');
+    
+tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        switchTab(button.dataset.tab);
+    });
+});
+
+function switchTab(tabId) {
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    tabContents.forEach(content => content.classList.remove('active'));
+    document.querySelector(`.tab-button[data-tab="${tabId}"]`).classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+}
 
 // Function to show a specific section
 const showSection = (sectionId) => {

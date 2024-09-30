@@ -13,8 +13,10 @@ import {
     collection,
     where,
     getDocs,
-} from '../firebase.js';
+} from '../apis/firebase.js';
 import { displayUserProfile } from '../app.js';
+import { formatTimestamp } from '../apis/timestamp.js';
+import { escapeHtml } from '../apis/escapeHtml.js';
 const storage = getStorage();
 
 const getUserPostCount = async (userId) => {
@@ -72,6 +74,7 @@ updateNameButton.addEventListener('click', async () => {
     }
 });
 
+const avatarPreview = document.getElementById('img-frame');
 const fileInput = document.querySelector('.file-input');
 const uploadButton = document.querySelector('.upload-btn');
 let selectedFile; 
@@ -82,6 +85,9 @@ fileInput.addEventListener('change', (event) => {
 
 uploadButton.addEventListener('click', () => {
     if (selectedFile) {
+        const postButton = document.getElementById('uploadButton'); // El botón de envío del post
+        postButton.disabled = true;
+
         const userId = auth.currentUser.uid;
         const storageRef = ref(storage, `users/${userId}/avatar/${selectedFile.name}`);
 
@@ -95,6 +101,9 @@ uploadButton.addEventListener('click', () => {
                     title: "Avatar actualizado",
                     text: "Tu avatar fue actualizado correctamente!",
                 });
+
+                postButton.disabled = false;
+                avatarPreview.style.backgroundImage = "";
                 displayUserProfile()
             });
         }).catch((error) => {
@@ -104,6 +113,8 @@ uploadButton.addEventListener('click', () => {
                 text: "Error al actualizar avatar!",
                 footer: `${error.message}`
             });
+            postButton.disabled = false;
+            avatarPreview.style.backgroundImage = "";
         });
     } else {
         Swal.fire({
@@ -111,9 +122,11 @@ uploadButton.addEventListener('click', () => {
             title: "Error",
             text: "Por favor selecciona una imagen!"
         });
+        postButton.disabled = false;
     }
 });
 
+const headerPreview = document.getElementById('img-frame-header');
 const fileInputHeader = document.querySelector('.file-input-header');
 const uploadButtonHeader = document.querySelector('.upload-btn-header');
 let selectedFileHeader; 
@@ -124,6 +137,9 @@ fileInputHeader.addEventListener('change', (event) => {
 
 uploadButtonHeader.addEventListener('click', () => {
     if (selectedFileHeader) {
+        const postButton = document.getElementById('uploadButton'); // El botón de envío del post
+        postButton.disabled = true;
+
         const userId = auth.currentUser.uid;
         const storageRef = ref(storage, `users/${userId}/header/${selectedFileHeader.name}`);
 
@@ -137,6 +153,8 @@ uploadButtonHeader.addEventListener('click', () => {
                     title: "Header actualizado",
                     text: "Tu header fue actualizado correctamente!",
                 });
+                postButton.disabled = false;
+                headerPreview.style.backgroundImage = "";
                 displayUserProfile()
             });
         }).catch((error) => {
@@ -146,6 +164,8 @@ uploadButtonHeader.addEventListener('click', () => {
                 text: "Error al actualizar header!",
                 footer: `${error.message}`
             });
+            postButton.disabled = false;
+            headerPreview.style.backgroundImage = "";
         });
     } else {
         Swal.fire({
@@ -153,6 +173,7 @@ uploadButtonHeader.addEventListener('click', () => {
             title: "Error",
             text: "Por favor selecciona una imagen!"
         });
+        postButton.disabled = false;
     }
 });
 
@@ -201,14 +222,14 @@ export const displayUserTweets = async () => {
                             <div class="tweet-profile-content-container">
                                 <div class="tweet-profile-title-container">
                                     <div class="tweet-profile-info">
-                                        <div class="tweet-profile-title">${userDoc.data().username || 'Anonymous'}</div>
+                                        <div class="tweet-profile-title">${escapeHtml(userDoc.data().username || 'Anonymous')}</div>
                                         <div class="tweet-check-mark">
                                             <i class="fas fa-check-circle"></i>
                                         </div>
-                                        <div class="tweet-handle">@${userDoc.data().userHandle || 'Anonymous'} · ${new Date(tweet.timestamp.seconds * 1000).toLocaleTimeString()}</div>
+                                        <div class="tweet-handle">@${escapeHtml(userDoc.data().userHandle || 'Anonymous')} · ${formatTimestamp(tweet.timestamp)}</div>
                                     </div>
                                 </div>
-                                <div class="tweet-content">${tweet.text}</div>
+                                <div class="tweet-content">${escapeHtml(tweet.text)}</div>
                             </div>
                         </div>
 
@@ -229,10 +250,10 @@ export const displayUserTweets = async () => {
                             </div>
                         </div>
                     `;
-                    perfilTweetsContainer.appendChild(tweetElement);
+                    perfilTweetsContainer.prepend(tweetElement);
                 });
             } else {
-                perfilTweetsContainer.innerHTML = '<p>No hay tweets disponibles.</p>';
+                perfilTweetsContainer.innerHTML = '<p>No tienes tweets.</p>';
             }
 
         } catch (error) {

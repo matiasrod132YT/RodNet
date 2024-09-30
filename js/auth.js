@@ -5,7 +5,14 @@ import {
   doc, 
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
- } from "./firebase.js"
+} from "./apis/firebase.js"
+
+// Set up an authentication state listener
+auth.onAuthStateChanged(user => {
+    if (user) {
+        window.location.href = 'dashboard.html';
+    }
+});
 
 // Toggle between Login and Register forms
 document.getElementById('show-register')?.addEventListener('click', (e) => {

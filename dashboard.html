@@ -24,7 +24,7 @@
             <li>
               <div id="home-btn" class="hover-wrapper">
                 <span class="icon"><i class="fas fa-home"></i></span>
-                <span class="menu-text">Home</span>
+                <span class="menu-text">Inicio</span>
               </div>
             </li>
             <li class="mobile-icon">
@@ -46,15 +46,15 @@
                 <span class="menu-text">Retweets</span>
               </div>
             </li>
-            <li class="dissappear">
+            <li>
               <div id="liked-btn" class="hover-wrapper">
-                <span class="icon"><i class="far fa-heart"></i></span>
+                <span class="icon icon-style"><i class="far fa-heart"></i></span>
                 <span class="menu-text">Liked</span>
               </div>
             </li>
-            <li id="admin-main-btn" class="dissappear">
+            <li id="admin-main-btn">
               <div id="admin-btn" class="hover-wrapper">
-                <span class="icon"><i class="fas fa-user-tie"></i></span>
+                <span class="icon icon-style"><i class="fas fa-user-tie"></i></span>
                 <span class="menu-text">Admin</span>
               </div>
             </li>
@@ -64,10 +64,10 @@
                 <span class="menu-text">Cerrar Sesion</span>
               </div>
             </li>
-            <li>
+            <li class="dissappear2 dissappear">
               <div id="post">
                 <div class="tweet-modal-button">
-                  <span class="tweet-model-button-text">Post</span>
+                  <span class="tweet-model-button-text">Postear</span>
                   <span class="tweet-model-button-icon">
                     <i class="fas fa-feather-alt"></i>
                   </span>
@@ -75,6 +75,7 @@
               </div>
             </li>
           </ul>
+
           <div class="perfil-container">
             <div id="profile-btn" class="perfil">
                 <img class="user-avatar" src="./images/avatar.png" draggable="false" alt="">
@@ -93,7 +94,7 @@
             <header>
             <span class="profile-container">
                 <span class="mobile-profile-pic">
-                <img class="profile-pic" src="./images/avatar.png" alt="Profile Picture">
+                <img class="profile-pic user-avatar" src="./images/avatar.png" alt="Profile Picture">
                 </span>
                 <h1 id="main-page-home-header">Home</h1>
             </span>
@@ -109,7 +110,7 @@
                   
                   <!-- Contenedor para vista previa de imagen -->
                   <div id="image-preview-container" style="display: none;">
-                      <img id="image-preview" alt="Image Preview" style="max-width: 100%; margin-top: 10px;">
+                      <img id="image-preview" alt="Image Preview">
                   </div>
                   
                   <div class="compose-buttons-icons">
@@ -138,7 +139,7 @@
                           </div>
                       </div>
                       <div>
-                          <button class="compose-button" type="submit" name="button">Post</button>
+                          <button id="post-button" class="compose-button" type="submit" name="button">Postear</button>
                       </div>
                   </div>
               </div>
@@ -152,9 +153,9 @@
               </div>
           </form>
 
-            <div class="separator"></div>
-        
-            <div class="posts-container" id="posts-container" class="twitter-posts"></div>
+          <div class="separator"></div>
+      
+          <div class="posts-container" id="posts-container" class="twitter-posts"></div>
         </div>
         
         <div id="notificaciones" class="content-section">
@@ -207,57 +208,176 @@
                         <div class="header-img"></div>
                         <img class="user-avatar perfil-img" src="./images/avatar.png" alt="Avatar Perfil">
                     </div>
-                    <div class="perfil-info">
-                        <h1 class="username">Username</h1>
-                        <p class="handle">Email</p>
+                    <div class="perfil-info-contenedor">
+                      <div class="perfil-info">
+                        <h1 class="username"></h1>
+                        <p class="handle"></p>
+                      </div>
+                      <div>
+                        <div id="logout2" class="mobile-profile-pic hover-wrapper">
+                          <span class="icon"><i class="logout fas fa-right-from-bracket"></i></span>
+                          <span class="menu-text">Cerrar Sesion</span>
+                        </div>
+                      </div>
                     </div>
                 </div>
                 <div class="profile-body">
                     <div class="upload-container">
-                        <input type="file" class="file-input" id="fillInput" accept="image/*">
-                        <button class="upload-btn" id="uploadButton">Actualizar Avatar</button>
+                      <div>
+                        <div>Cambiar Avatar</div>
+                        <div class="upload-contenedor">
+                          <input type="file" class="file-input" id="img-file" accept="image/*">
+                          <label for="img-file" id="img-frame" class="img-frame"></label>
+                          <button class="upload-btn compose-button" id="uploadButton">Actualizar Avatar</button>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div>Cambiar Header</div>
+                        <div class="upload-contenedor">
+                          <input type="file" class="file-input-header" id="img-file-header" accept="image/*">
+                          <label for="img-file-header" id="img-frame-header" class="img-frame-header"></label>
+                          <button class="upload-btn-header compose-button" id="uploadButton">Actualizar Header</button>
+                        </div>
+                      </div>
                     </div>
-                    <p id="upload-status"></p>
-                    
-                    <!-- Additional section for header image upload -->
-                    <div class="upload-container">
-                        <input type="file" class="file-input-header" accept="image/*">
-                        <button class="upload-btn-header">Actualizar Header</button>
-                    </div>
-                    <p id="upload-status2"></p>
                 
                     <!-- Add fields for updating profile name and email -->
                     <div class="update-profile">
-                        <label for="new-username">Change Name:</label>
-                        <input type="text" class="new-username" id="new-username" placeholder="">
-                        <button class="update-btn" id="update-btn-username">Update Name</button>
+                      <input type="text" class="compose-text" id="new-username" autocomplete="off" placeholder="Username">
+                      <button class="update-btn" id="update-btn-username">Actualizar Nombre</button>
+                    </div>
+
+                    <div class="update-profile">
+                      <input type="text" class="compose-text" id="new-contraseña" autocomplete="off" placeholder="Contraseña">
+                      <button class="update-btn" id="update-btn-contraseña">Actualizar Contraseña</button>
                     </div>
                 </div>
+                <div class="separator">Tweets</div>
                 <div class="perfil-tweets"></div>
             </div>
         </div>
 
         <div id="admin" class="content-section">
           <div class="perfil-contenedor">
-              <div class="perfil-header-top">
-                  <div>
-                      <div class="username header-top-h1">Username</div>
-                      <div class="header-top-p">ADMIN</div>
-                  </div>
+            <div class="perfil-header-top">
+              <div>
+                  <div class="username header-top-h1">Username</div>
+                  <div class="header-top-p">ADMIN</div>
               </div>
-
-              <form id="notificacionesForm">
-                <label for="titulo">Título:</label>
-                <input type="text" id="titulo" name="titulo" required><br>
-
-                <label for="mensaje">Mensaje:</label>
-                <textarea id="mensaje" name="mensaje" required></textarea><br>
-
-                <button type="submit">Agregar Notificación</button>
-              </form>
+            </div>
+            <div class="profile-body">
+              <h1>Panel de Administración de Twitter</h1>
+              <div class="tabs">
+                  <button class="compose-button tab-button active" data-tab="verificado">Verificados</button>
+                  <button class="compose-button tab-button" data-tab="notificacion">Notificaciones</button>
+                  <button class="compose-button tab-button" data-tab="admins">Administradores</button>
+                  <button class="compose-button tab-button" data-tab="trends">Tendencias</button>
+                  <button class="compose-button tab-button" data-tab="moderation">Moderación</button>
+                  <button class="compose-button tab-button" data-tab="stats">Estadísticas</button>
+              </div>
+              <div class="tab-content active" id="verificado">
+                <h2>Añadir Usuario Verificado</h2>
+                <form id="verificacionForm">
+                  <input type="text" class="compose-text" id="username-verificado" placeholder="@Usuario" autocomplete="off" required>
+                  <button class="compose-button" id="verificado-button" type="submit">Agregar Verificado</button>
+                </form>
+                <h3>Usuarios Verificados</h3>
+                <ul id="lista-verificados"></ul>
+              </div>
+              <div class="tab-content" id="notificacion">
+                <h2>Crear Nueva Notificación</h2>
+                <form id="notificacionesForm">
+                    <label for="ad-content">Contenido de Notificación:</label>
+                    <textarea id="mensaje" name="mensaje" placeholder="Escribe el contenido del anuncio aquí..." required></textarea>
+                    <button class="compose-button" id="notificacion-button" type="submit">Agregar Notificación</button>
+                </form>
+                <h3>Notificaciones Activos</h3>
+                <ul id="lista-notificaciones"></ul>
+              </div>
+              <div class="tab-content" id="admins">
+                  <h2>Añadir Nuevo Administrador</h2>
+                  <form id="administradorForm">
+                      <label for="admin-name">Nombre del Administrador:</label>
+                      <input type="text" class="compose-text" id="username-administrador" placeholder="@Usuario" autocomplete="off" required>
+                      <button class="compose-button" id="admin-button" type="submit">Añadir Administrador</button>
+                  </form>
+                  <h3>Administradores Actuales</h3>
+                  <ul id="lista-admins"></ul>
+              </div>
+              <div class="tab-content" id="trends">
+                  <h2>Gestionar Tendencias</h2>
+                  <form id="trend-form">
+                      <label for="trend-name">Nombre de la Tendencia:</label>
+                      <input type="text" class="compose-text" id="trend-name" placeholder="#NuevaTendencia" required>
+                      <label for="trend-category">Categoría:</label>
+                      <select id="trend-category" name="trend-category" required>
+                          <option value="">Selecciona una categoría</option>
+                          <option value="politica">Política</option>
+                          <option value="entretenimiento">Entretenimiento</option>
+                          <option value="deportes">Deportes</option>
+                          <option value="tecnologia">Tecnología</option>
+                      </select>
+                      <button class="compose-button" type="submit">Añadir Tendencia</button>
+                  </form>
+                  <h3>Tendencias Actuales</h3>
+                  <ul id="lista-trends"></ul>
+              </div>
+              <div class="tab-content" id="moderation">
+                  <h2>Moderación de Contenido</h2>
+                  <form id="moderation-form">
+                      <label for="report-id">ID del Reporte:</label>
+                      <input type="text" id="report-id" class="compose-text" placeholder="REP12345" required>
+                      <label for="report-content">Contenido Reportado:</label>
+                      <textarea id="report-content" name="report-content" required placeholder="Contenido reportado aquí..."></textarea>
+                      <label for="moderation-action">Acción:</label>
+                      <select id="moderation-action" name="moderation-action" required>
+                          <option value="">Selecciona una acción</option>
+                          <option value="aprobar">Aprobar</option>
+                          <option value="eliminar">Eliminar</option>
+                          <option value="advertir">Advertir al Usuario</option>
+                      </select>
+                      <button class="compose-button" type="submit">Aplicar Acción</button>
+                  </form>
+                  <h3>Reportes Recientes</h3>
+                  <ul id="lista-reportes"></ul>
+              </div>
+              <div class="tab-content" id="stats">
+                <h2>Estadísticas de la Plataforma</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Usuarios Activos</h3>
+                        <p id="active-users">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Tweets por Minuto</h3>
+                        <p id="tweets-per-minute">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Nuevos Registros (Hoy)</h3>
+                        <p id="new-registrations">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Reportes Pendientes</h3>
+                        <p id="pending-reports">0</p>
+                    </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+        <script>
+          // Simular estadísticas3
+          function updateStats() {
+              document.getElementById('active-users').textContent = Math.floor(Math.random() * 1000000);
+              document.getElementById('tweets-per-minute').textContent = Math.floor(Math.random() * 5000);
+              document.getElementById('new-registrations').textContent = Math.floor(Math.random() * 10000);
+              document.getElementById('pending-reports').textContent = Math.floor(Math.random() * 1000);
+          }
 
+          updateStats();
+          setInterval(updateStats, 5000);
+      </script>
         <div id="liked" class="content-section">
           <div class="perfil-contenedor">
               <div class="perfil-header-top">
@@ -282,9 +402,7 @@
 
           <div class="trends-continer">
             <div class="trends-title-container">
-              <div class="trends-title">
-                Trends for you
-              </div>
+              <div class="trends-title">Tendencias para ti</div>
             </div>
 
             <div class="trends-list"></div>
@@ -295,6 +413,6 @@
   <script type="module" src="./js/app.js"></script>
   <script type="module" src="./js/admin.js"></script>
   <script type="module" src="./js/paginas/text.js"></script>
-  <script type="module" src="./js/emojis.js"></script>
+  <script type="module" src="./js/apis/emojis.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </html>

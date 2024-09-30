@@ -8,74 +8,69 @@ import {
     doc,
     orderBy,
     onSnapshot
-} from '../firebase.js';
+} from '../apis/firebase.js';
+import { escapeHtml } from '../apis/escapeHtml.js';
 
 // Maneja el formulario para agregar notificaciones
 const notificacionesForm = document.getElementById('notificacionesForm');
 
 notificacionesForm.addEventListener('submit', async (e) => {
-  e.preventDefault();  // Evita que se recargue la página al enviar el formulario
-
-  // Obtén los valores del formulario
-  const titulo = document.getElementById('titulo').value;
-  const mensaje = document.getElementById('mensaje').value;
-
-  try {
-    // Agrega una nueva notificación a la colección 'NOTIFICACIONES'
-    await addDoc(collection(db, 'notificaciones'), {
-      titulo: titulo,
-      mensaje: mensaje,
-      timestamp: new Date()
-    });
-
-    Swal.fire({
-        icon: "success",
-        title: "Notificación",
-        text: "Notificación agregada con éxito.",
-    });
-
-    // Limpia el formulario
-    notificacionesForm.reset();
-  } catch (error) {
-    console.error('Error al agregar la notificación:', error);
-    Swal.fire({
-        icon: "error",
-        title: "ERROR",
-        text: "Error al agregar la notificación.",
-        footer: error,
-    });
-  }
-});
-
-// Función para cargar notificaciones en tiempo real
-const cargarNotificaciones = () => {
-    const listaNotificaciones = document.getElementById('listaNotificaciones');
+    e.preventDefault();  // Evita que se recargue la página al enviar el formulario
     
-    // Crear una consulta ordenada por timestamp
-    const q = query(collection(db, 'notificaciones'), orderBy('timestamp', 'desc'));
+    const postButton = document.getElementById('notificacion-button'); // El botón de envío del post
+    postButton.disabled = true;
+    
+    if (auth.currentUser) {
+        const userId = auth.currentUser.uid;
 
-    // Escuchar los cambios en tiempo real
-    onSnapshot(q, (snapshot) => {
-      // Limpiar la lista de notificaciones antes de agregar las nuevas
-      listaNotificaciones.innerHTML = '';
+        // Obtén los valores del formulario
+        const mensaje = document.getElementById('mensaje').value;
 
-      // Iterar sobre los documentos en la colección 'notificaciones'
-      snapshot.forEach((doc) => {
-        const notificacion = doc.data();
-        
-        // Crear un elemento de lista para cada notificación
-        const li = document.createElement('li');
-        li.innerHTML = `<strong>${notificacion.titulo}</strong>: ${notificacion.mensaje}`;
-        
-        // Agregar el elemento de lista al ul
-        listaNotificaciones.appendChild(li);
-      });
-    });
-}
+        try {
+            const userDoc = await getDoc(doc(db, 'users', userId));
+            const userData = userDoc.data();
+            
+            if (userData.admin === true) {
+                // Agrega una nueva notificación a la colección 'NOTIFICACIONES'
+                await addDoc(collection(db, 'notificaciones'), {
+                mensaje: mensaje,
+                timestamp: new Date(),
+                userId: userId,
+                });
 
+                Swal.fire({
+                    icon: "success",
+                    title: "Notificación",
+                    text: "Notificación agregada con éxito.",
+                });
+
+                // Limpia el formulario
+                notificacionesForm.reset();
+            } else {
+                Swal.fire({
+                  icon: "error",
+                  title: "ERROR",
+                  text: "No eres administrador para realizar esto.",
+                });
+            }
+        } catch (error) {
+            console.error('Error al agregar la notificación:', error);
+            Swal.fire({
+                icon: "error",
+                title: "ERROR",
+                text: "Error al agregar la notificación.",
+                footer: error,
+            });
+        } finally {
+            postButton.disabled = false;
+        }
+    } else {
+        postButton.disabled = false;
+    }
+});
 const notificacionesContainer = document.querySelector('.notificaciones-container');
 
-// Función para mostrar los tweets que el usuario ha dado like
+// Función para mostrar las notificaciones
 export const displayNotificaciones = async () => {
     if (auth.currentUser) {
         const userId = auth.currentUser.uid;
@@ -83,34 +78,35 @@ export const displayNotificaciones = async () => {
         try {
             // Obtener el nombre de usuario
             const userDoc = await getDoc(doc(db, 'users', userId)); // Ajusta 'users' a tu colección de usuarios
+            const userData = userDoc.data();
 
-            // Consulta para obtener todos los tweets que el usuario ha dado like
+            // Consulta para obtener todas las notificaciones
             const q = query(collection(db, 'notificaciones'), orderBy('timestamp', 'desc'));
 
             // Escuchar los cambios en tiempo real
             onSnapshot(q, (snapshot) => {
                 // Limpiar la lista de notificaciones antes de agregar las nuevas
                 notificacionesContainer.innerHTML = '';
-        
-                // Iterar sobre los documentos en la colección 'notificaciones'
+                
+                // Recorrer todas las notificaciones
                 snapshot.forEach((doc) => {
                     const notificacion = doc.data();
-                    
-                    // Crear un elemento de lista para cada notificación
-                    const tweetElement = document.createElement('div');
-                    tweetElement.classList.add('tweet');
-                    tweetElement.innerHTML = `<strong>${notificacion.titulo}</strong>: ${notificacion.mensaje}`;
-                    tweetElement.innerHTML = `
+
+                    // Crear un elemento para la notificación
+                    const notificacionElement = document.createElement('div');
+                    notificacionElement.classList.add('tweet');
+                    notificacionElement.innerHTML = `
                             <div class="tweet-post">
                                 <div class="compose-profile-container retweet-style">
+                                    <img class="compose-profile" src="${userData.avatarUrl || './images/avatar.png'}" draggable="false" alt="Imagen de perfil">
                                     <div class="tweet-profile-content-container">
                                         <div class="tweet-profile-title-container">
                                             <div class="tweet-profile-info">
-                                                <div class="tweet-profile-title">${notificacion.titulo}</div>
-                                                <div class="tweet-handle"> · ${new Date(notificacion.timestamp.seconds * 1000).toLocaleTimeString()}</div>
+                                                <div class="tweet-profile-title">${escapeHtml(userData.username || 'Anonymous')}</div>
+                                                <div class="tweet-handle">@${escapeHtml(userData.userHandle || 'Anonymous')}</div>
                                             </div>
                                         </div>
-                                        <div class="tweet-content">${notificacion.mensaje}</div>
+                                        <div class="tweet-content">${escapeHtml(notificacion.mensaje)}</div>
                                     </div>
                                 </div>
 
@@ -118,14 +114,13 @@ export const displayNotificaciones = async () => {
                             </div>
                         `;
                     
-                    // Agregar el elemento de lista al ul
-                    notificacionesContainer.appendChild(tweetElement);
+                    // Agregar la notificación al contenedor
+                    notificacionesContainer.appendChild(notificacionElement);
                 });
             });
 
-
         } catch (error) {
-            console.error('Error fetching liked tweets:', error.message);
+            console.error('Error fetching notifications:', error.message);
         }
     }
 };

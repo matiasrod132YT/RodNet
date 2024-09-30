@@ -7,7 +7,9 @@ import {
     query,
     collection,
     where,
-} from '../firebase.js';
+} from '../apis/firebase.js';
+import { formatTimestamp } from '../apis/timestamp.js';
+import { escapeHtml } from '../apis/escapeHtml.js';
 
 // Función para obtener el número de retweets hechos por el usuario
 const getUserRetweetCount = async (userId) => {
@@ -81,14 +83,14 @@ export const displayReTweets = async () => {
                                 <div class="tweet-profile-content-container">
                                     <div class="tweet-profile-title-container">
                                         <div class="tweet-profile-info">
-                                            <div class="tweet-profile-title">${userDoc.data().username || 'Anonymous'}</div>
+                                            <div class="tweet-profile-title">${escapeHtml(userDoc.data().username || 'Anonymous')}</div>
                                             <div class="tweet-check-mark">
                                                 <i class="fas fa-check-circle"></i>
                                             </div>
-                                            <div class="tweet-handle">@${userDoc.data().userHandle || 'Anonymous'} · ${new Date(tweet.timestamp.seconds * 1000).toLocaleTimeString()}</div>
+                                            <div class="tweet-handle">@${escapeHtml(userDoc.data().userHandle || 'Anonymous')} · ${formatTimestamp(tweet.timestamp)}</div>
                                         </div>
                                     </div>
-                                    <div class="tweet-content">${tweet.text}</div>
+                                    <div class="tweet-content">${escapeHtml(tweet.text)}</div>
                                 </div>
                             </div>
 

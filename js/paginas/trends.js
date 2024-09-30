@@ -2,10 +2,13 @@ import {
     db,
     collection,
     query,
+    getDoc,
+    doc,
     orderBy,
     getDocs,
-} from './firebase.js';
+} from '../apis/firebase.js';
 const trendsList = document.querySelector('.trends-list');
+import { escapeHtml } from '../apis/escapeHtml.js';
 
 // Función para actualizar la sección de tendencias
 export const updateTrends = async () => {
@@ -18,7 +21,10 @@ export const updateTrends = async () => {
         const topPosts = posts.slice(0, 5);
 
         trendsList.innerHTML = ''; // Limpiar la lista de tendencias
-        topPosts.forEach(post => {
+        topPosts.forEach(async (post) => {
+            const userDoc = await getDoc(doc(db, 'users', post.userId));
+            const userData = userDoc.data();
+
             const postElement = document.createElement('div');
             postElement.classList.add('trend-post');
             postElement.setAttribute('data-post-id', post.id);
@@ -26,10 +32,12 @@ export const updateTrends = async () => {
                 <div class="trending-post">
                     <div class="trending-info">
                         <div class="trending-country-options-container">
-                        <div class="trending-country">${post.text}</div>
+                        <div class="trending-country">@${escapeHtml(userData.userHandle)}</div>
                         </div>
-                        <div class="trending-post-title">${post.text}</div>
+                        <div class="trending-post-title">${escapeHtml(post.text)}</div>
                         <div class="trending-post-detail">
+
+                        ${post.postImg ? `<img class="tweet-photo" src="${post.postImg}" alt="Imagen del post">` : ''}
 
                         </div>
                         <div class="trending-post-number-tweets">${post.likes || 0} likes</div>

@@ -7,13 +7,15 @@ import {
     getDoc,
     updateDoc,
     arrayUnion,
+    onSnapshot,
     arrayRemove,
     serverTimestamp,
     deleteDoc
-} from './firebase.js';
+} from './apis/firebase.js';
 import { fetchPosts } from './paginas/text.js';
 import { displayLikedTweets } from './paginas/liked.js';
 import { displayReTweets } from './paginas/retweet.js';
+import { updateTrends } from './paginas/trends.js';
 
 // Function to handle the like logic
 export const handleLike = async (postId) => {
@@ -42,39 +44,13 @@ export const handleLike = async (postId) => {
             }
 
             // Re-fetch the posts to update the UI
-            fetchPosts();
             displayLikedTweets();
+            updateTrends();
         } else {
             console.log('Post does not exist!');
         }
     } catch (error) {
         console.error('Error updating likes:', error.message);
-    }
-};
-
-// Function to handle the comment logic
-export const handleComment = async (postId, commentText) => {
-    try {
-        const userId = auth.currentUser.uid;
-        const userDoc = await getDoc(doc(db, 'users', userId));
-        const userName = userDoc.exists() ? userDoc.data().username : 'Anonymous';
-
-        const newComment = {
-            text: commentText,
-            userId,
-            userName,
-            timestamp: new Date(),
-        };
-
-        const postRef = doc(db, 'posts', postId);
-        await updateDoc(postRef, {
-            commentsBy: arrayUnion(newComment), // Add the comment to the 'commentsBy' array
-        });
-
-        // Re-fetch the posts to update the UI
-        fetchPosts();
-    } catch (error) {
-        console.error('Error adding comment:', error.message);
     }
 };
 
@@ -112,7 +88,6 @@ export const handleRetweet = async (postId) => {
             });
 
             // Re-fetch the posts to update the UI
-            fetchPosts();
             displayReTweets();
         } else {
             console.log('Post does not exist!');
@@ -141,8 +116,8 @@ export const deletePost = async (postId) => {
                 if (result.isConfirmed) {
                     deleteDoc(postRef);
                     Swal.fire("Post eliminado con éxito.");
-                    fetchPosts();
                     displayReTweets();
+                    updateTrends();
                 } else if (result.isDenied) {
                     return
                 }
@@ -157,5 +132,77 @@ export const deletePost = async (postId) => {
         }
     } catch (error) {
         console.error('Error al eliminar el post:', error.message);
+    }
+};
+
+// Función para manejar la adición de un comentario
+export const handleComment = async (postId, commentText) => {
+    const postButton = document.getElementById('comment-button'); // El botón de envío del post
+    postButton.disabled = true;
+
+    try {
+        const commentData = {
+            text: commentText,
+            userId: auth.currentUser.uid,
+            avatarUrl: auth.currentUser.photoURL || './images/avatar.png',
+            username: auth.currentUser.displayName || 'Anonymous',
+            userHandle: auth.currentUser.email.split('@')[0], // O el método que uses para obtener el handle
+            timestamp: new Date(),
+        };
+        listenForPostUpdates(postId, updateUI);
+        // Agrega el comentario en la subcolección `comments` del post
+        await addDoc(collection(db, `posts/${postId}/comments`), commentData);
+    } catch (error) {
+        console.error('Error al añadir el comentario:', error);
+    } finally {
+        postButton.disabled = false; // Reactivar el botón después de completar el proceso
+    }
+};
+
+// Función para manejar la eliminación de un comentario
+export const deleteComment = async (postId, commentId) => {
+    try {
+        Swal.fire({
+            icon: "warning",
+            title: "¿Estás seguro de que deseas eliminar este comentario?",
+            showDenyButton: true,
+            confirmButtonText: "Si",
+            denyButtonText: `No`
+        }).then((result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                deleteDoc(doc(db, `posts/${postId}/comments/${commentId}`));
+                Swal.fire("Comentario eliminado con éxito.");
+                fetchPosts();
+            } else if (result.isDenied) {
+                return
+            }
+        });
+    } catch (error) {
+        console.error('Error al eliminar el comentario:', error);
+    }
+};
+// Función para escuchar los cambios en los comentarios, retweets y likes
+export const listenForPostUpdates = (postId, updateUI) => {
+    try {
+        // Listener para los comentarios en tiempo real
+        const commentsRef = collection(db, `posts/${postId}/comments`);
+        onSnapshot(commentsRef, async (snapshot) => {
+            const commentCount = snapshot.size;
+            updateUI('comments', commentCount, postId);
+        });
+    } catch (error) {
+        console.error('Error al escuchar actualizaciones del post:', error);
+    }
+};
+
+// Función que actualiza el DOM con los nuevos valores
+const updateUI = (type, value, postId) => {
+    switch (type) {
+        case 'comments':
+            document.getElementById(`comment-count-${postId}`).innerText = value;
+            break;
+        default:
+            console.error('Tipo de actualización no reconocido:', type);
     }
 };
